@@ -17,9 +17,9 @@
 
 #for file in `ls $read_direc`; do foo=${file#$prefix}; foo=${foo%$suffix}; sample=$foo; qsub  -v read_direc=$read_direc,sample=$sample /ebio/abt6_projects9/Pseudomonas_diversity/Tnseq/code/s1_general_adapter_trimming.sh; done
 
-read_direc=$read_direc
+read_direc=/ebio/abt6_projects9/Pseudomonas_diversity/Pseudomonas_mapping/data/raw_reads/hiseq_0141 #$read_direc
 sample=$sample
-processed_direc=/ebio/abt6_projects9/Pseudomonas_diversity/Tnseq/processed_reads/hiseq0091 #$processed_direc
+processed_direc=/ebio/abt6_projects9/Pseudomonas_diversity/Pseudomonas_mapping/data/processed_reads/hiseq_0141 #$processed_direc
 suffix=_RunId0091_LaneId1 #$suffix #suffix=_LaneId1
 prefix=illumina_ST-J00101_flowcellA_SampleId
 
