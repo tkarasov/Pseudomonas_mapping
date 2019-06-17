@@ -187,10 +187,11 @@ result = subprocess.run()
 
 
 
-sed -i -e 's/-nan/0/g' strain.BN.kinf
+'''sed -i -e 's/-nan/0/g' strain.BN.kinf
 emmax -v -d 10 -t strain -o strain.out -k mash_kin.kinf -p strain.pheno                                                                                                             
                          
 
 
 
 GC00000053_48 -19853.69 4.262302e-25
+'''
