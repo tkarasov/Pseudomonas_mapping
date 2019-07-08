@@ -9,8 +9,8 @@ https://confluence.eb.local:8443/display/C029RAPA/Setup+and+usage+of+the+FLIR+im
 
 ## Assocation Mapping
 We utilize several methods for association mapping
-(1) EMMA with P/A polymorphisms
-(2) Kmer analysis
+(1) EMMA with P/A polymorphisms \
+(2) Kmer analysis \
 
 ## Tnseq Analysis
 In parallel with the mapping, we have accrued a genetic knockout library
