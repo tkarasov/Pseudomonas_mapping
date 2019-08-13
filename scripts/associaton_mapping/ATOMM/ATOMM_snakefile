@@ -1,0 +1,37 @@
+
+rule convert_to_fasta:
+    input:
+        "/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/geneCluster"
+    output:
+        "fake_gene_SNP.fasta"
+        "snp_coordinates.txt"
+    shell:
+        python prep_genotype.py {input}
+
+rule prep_plink_files:
+    input:
+        "fake_gene_SNP.fasta"
+    output:
+        "genotypefile.txt"
+        "sizefile.txt"
+        "freqfile.txt"
+    shell:
+        python prep_for_gemma_atomm.py
+
+rule build_kinship:
+    input:
+        "fake_"
+    output:
+
+    shell:
+        /kinship_ATOMM.o -g genotypefile.txt -s sizefile.txt -k kinshipfile.txt -f freqfile.txt
+
+rule run_gemma:
+    input:
+    output:
+    shell:
+
+rule run_ATOMM:
+    input:
+    output:
+    shell:
