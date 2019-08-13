@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/bash
+#$ -S /bin/bash 
 #
 #  Reserve 16 CPUs for this job
 #$ -pe parallel 16
@@ -23,7 +24,7 @@
 #centrifuge pipeline instructions
 #change to the directory of reads
 export PATH=/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/bin:$PATH
-source /ebio/abt6/tkarasov/.bash_profile
+source ~/.bashrc
 source activate /ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping
 
 python=/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/bin/python

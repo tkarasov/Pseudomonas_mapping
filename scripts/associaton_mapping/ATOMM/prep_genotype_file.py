@@ -145,11 +145,12 @@ SeqIO.write(whole_fasta, "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/
 #Now convert to vcf
 os.chdir("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/")
 
-os.system("snp-sites -v -o /ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_file/my_1524.vcf fake_gene_SNP.fasta" )
+os.system("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/bin/snp-sites -v -b fake_gene_SNP.fasta -o /ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/my_1524.vcf " )
 
 #Now convert to plink
-os.system("/usr/bin/plink1 --vcf my_1524.vcf --double-id --maf 0.01 --recode --out my_1524.ped)
-
+os.system("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/bin/plink --vcf my_1524.vcf --double-id --maf 0.01 --recode --out my_1524.ped")
+os.system("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/bin/vcftools
+ --vcf my_1524.vcf --out my_1524 --plink-tped")
 
 
 with open("snp_coordinates.txt", "w") as f:
