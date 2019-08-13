@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/bin/python3
 from Bio import SeqIO
 import numpy
 import sys
@@ -60,7 +60,10 @@ def build_bim(my_bed, sorted_genelist):
 	return my_bim
 '''
 
-#https://training.h3abionet.org/postgraduate_workshop_2014/wp-content/uploads/2014/04/H3ABionet_2014_GWAS_2_Plink_Data_Format.pdf
+#https://training.h3abionet.org/
+
+
+#/wp-content/uploads/2014/04/H3ABionet_2014_GWAS_2_Plink_Data_Format.pdf
 def build_ped(phenotypes, strain_list, gene_pa):
 	my_ped = []
 	my_fam = []
@@ -114,7 +117,7 @@ my_ped,my_fam, my_pheno = build_ped(phenotypes, strain_list, gene_pa)
 
 handle = open("/ebio/abt6_projects9/Pseudomonas_diversity/Pseudomonas_mapping/data/mapping/emma/strain.map", "w")
 for line in my_map:
-	handle.write( '\t'.join([str(rec) for rec in line]))
+	handle.write( '\t'.join([str(rec) for rec in line]))less
 	handle.write("\n")
 
 handle.close()
