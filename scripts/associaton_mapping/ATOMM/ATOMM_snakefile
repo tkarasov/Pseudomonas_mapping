@@ -4,7 +4,6 @@ panX_directory="/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_an
 output_direc="/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files"
 
 
-
 #this first conversion step doesn't take much time or space so doesn't need to be done on the submit cluster
 
 rule convert_to_pd:
@@ -14,7 +13,7 @@ rule convert_to_pd:
         "fake_gene_SNP.fasta"
         "snp_coordinates.txt"
     shell:
-        python prep_genotype.py $panX_directory
+        python $code_direc/prep_genotype.py $panX_directory
 
 #Now we need to figure out how many chunks
 num_chunks=`ls $temp_direc | grep temp_pd | wc -l`
@@ -37,7 +36,7 @@ rule prep_vcf_files:
         "sizefile.txt"
         "freqfile.txt"
     shell:
-        python prep_for_gemma_atomm.py $output_direc
+        qsub -hold_jid "build_fasta" $code_direc/run_prep_for_gemma_atomm.sh $output_direc
 
 rule build_kinship_gemma:
     input:

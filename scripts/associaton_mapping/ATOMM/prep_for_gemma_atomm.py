@@ -5,12 +5,14 @@ Created on Mon Aug 12 16:13:49 2019
 
 @author: tkarasov
 """
+
+import sys
+sys.path.append("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/lib/python3.7/site-packages/")
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
-from Bio.Seq import Seq
+from Bio import SeqRecord
+from Bio import Seq
 import os
 import glob
-import sys
 import pickle
 import pandas as pd
 

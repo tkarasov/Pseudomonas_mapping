@@ -97,16 +97,16 @@ def create_fasta(gc):
 
 # First must build the fasta file from the panX output. We need to build a data file that has the concatenated sequences from the pangenome and also records the positions of the g
 panx_output = sys.argv[1]#'/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/'
-output_directory = sys.arg[2]
+output_directory = sys.argv[2]
 
 gene_cluster_path = panx_output + "/geneCluster"
 
 os.chdir(gene_cluster_path)
 
-sequenced_genome = os.listdir(panx_output+"input_GenBank")
+sequenced_genome = os.listdir(panx_output+"/input_GenBank")
 strain_list = [rec.strip('.gbk') for rec in sequenced_genome] 
 all_files = os.listdir(gene_cluster_path)
-gene_list = [rec for rec in all_files if "fna" in rec]
+gene_list = [rec for rec in all_files if "_na_aln" in rec]
 
 gc_dict = {}
 gc_pd=pd.DataFrame(columns=strain_list, index=[rec.strip('.fna') for rec in gene_list])
@@ -133,16 +133,16 @@ for line in results:
 #gc_pd = pd.from_dict(gc_dict)
 gc_pd.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/geneCluster.cpk")
 
-#now split gc into data frames of 1000 each
+#now split gc into data frames of 500 each
 os.chdir(output_direc)
-os.system("mkdir "+output_directory+"/temp_gc_pd")
+os.system("mkdir "+output_directory+"/temp2_gc_pd")
 num_chunks = np.round(len(gc_pd.index)/500.0)
 sub_pd = np.array_split(gc_pd, num_chunks)
 
 i=0
 for pd in sub_pd:
    i=i+1
-   pd.to_pickle(output_directory+"/temp_pd"+str(i)+".cpk")
+   pd.to_pickle(output_directory+"/temp2_gc_pd"+"/temp_pd"+str(i)+".cpk")
 
 
 
