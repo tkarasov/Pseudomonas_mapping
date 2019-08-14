@@ -36,27 +36,6 @@ def split_list(alist, wanted_parts=1):
              for i in range(wanted_parts) ]
 
         
-def fill_missing(gc_pd):
-    i = 0
-    gc_filled = copy.deepcopy(gc_pd)
-    gc_filled.ix[gene]
-    for gene in gc_filled.index:
-        fill_missing_sub(gene)
-        print(gene)
-    #processed_list = Parallel(n_jobs = 16)(delayed(fill_missing_sub)(gene) for gene in list(gc_filled.index))
-
-def fill_missing_sub(gene):
-#   for gene in gc_pd.index:
-    gene_length = max([len(gc_pd[rec][gene]) for rec in gc_pd.columns if str(gc_pd[rec][gene])!='nan'])
-    is_na = "-"*gene_length
-    replace = [strain for strain in gc_pd.columns if str(gc_pd[strain][gene])=="nan"]
-    
-    for rec in replace:
-        gc_filled[rec][gene] = is_na
-    
-    print(gene)
-    #return gc_filled
-        
 def reorder():
     '''this function is meant to reorder the genes so that they ar
     e somewhat syntenic'''
@@ -98,15 +77,24 @@ def create_fasta(gc):
 # First must build the fasta file from the panX output. We need to build a data file that has the concatenated sequences from the pangenome and also records the positions of the g
 panx_output = sys.argv[1]#'/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/'
 output_directory = sys.argv[2]
+core=sys.argv[3]
 
 gene_cluster_path = panx_output + "/geneCluster"
 
 os.chdir(gene_cluster_path)
 
 sequenced_genome = os.listdir(panx_output+"/input_GenBank")
+
 strain_list = [rec.strip('.gbk') for rec in sequenced_genome] 
+
 all_files = os.listdir(gene_cluster_path)
-gene_list = [rec for rec in all_files if "_na_aln" in rec]
+
+gene_list = [rec for rec in all_files if "_na_aln" in rec and "reduced" not in rec]
+
+#if we are only considering the core genome then we only need core_gene_list
+if core=="Core":
+    #first get core names
+    core_names=[line.strip().split() for line in os.system('ls ' panx_output)]
 
 gc_dict = {}
 gc_pd=pd.DataFrame(columns=strain_list, index=[rec.strip('.fna') for rec in gene_list])
@@ -123,7 +111,7 @@ for line in results:
     i=i+1
     print(i)
     for rec in list(line.keys()):
-        gc_pd[rec[0]][rec[1]] = str(line[rec])
+        gc_pd[rec[0].split("-")[0]][rec[1]] = str(line[rec])
 
 
 #results is a long list of dictionaries. Use chain map to make into one dictionary
