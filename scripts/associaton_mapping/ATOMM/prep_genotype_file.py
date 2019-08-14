@@ -96,11 +96,12 @@ def create_fasta(gc):
         
 
 # First must build the fasta file from the panX output. We need to build a data file that has the concatenated sequences from the pangenome and also records the positions of the g
-panx_output = '/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/'
+panx_output = sys.argv[1]#'/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/'
+output_directory = sys.arg[2]
 
-gense_cluster_path = panx_output + "geneCluster"
+gene_cluster_path = panx_output + "/geneCluster"
 
-os.chdir("/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/geneCluster")
+os.chdir(gene_cluster_path)
 
 sequenced_genome = os.listdir(panx_output+"input_GenBank")
 strain_list = [rec.strip('.gbk') for rec in sequenced_genome] 
@@ -129,29 +130,19 @@ for line in results:
 #the following didn't work
 #gc_full_dict = dict(ChainMap(*results))
 
-#  
-
-
 #gc_pd = pd.from_dict(gc_dict)
 gc_pd.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/geneCluster.cpk")
-gc_filled = fill_missing(gc_pd)
-gc_filled.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/geneCluster_filled.cpk")
-#gc_reordered = reorder(gc_filled)
 
-whole_fasta = create_fasta(gc_reordered)
+#now split gc into data frames of 1000 each
+os.chdir(output_direc)
+os.system("mkdir "+output_directory+"/temp_gc_pd")
+num_chunks = np.round(len(gc_pd.index)/500.0)
+sub_pd = np.array_split(gc_pd, num_chunks)
 
-SeqIO.write(whole_fasta, "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_file/fake_gene_SNP.fasta", "fasta")
-
-#Now convert to vcf
-os.chdir("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/")
-
-os.system("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/bin/snp-sites -v -b fake_gene_SNP.fasta -o /ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/my_1524.vcf " )
-
-#Now convert to plink
-os.system("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/bin/plink --vcf my_1524.vcf --double-id --maf 0.01 --recode --out my_1524.ped")
-os.system("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/bin/vcftools
- --vcf my_1524.vcf --out my_1524 --plink-tped")
+i=0
+for pd in sub_pd:
+   i=i+1
+   pd.to_pickle(output_directory+"/temp_pd"+str(i)+".cpk")
 
 
-with open("snp_coordinates.txt", "w") as f:
-    f.write(",".join(gene_coordinates))
+

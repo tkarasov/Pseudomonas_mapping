@@ -34,9 +34,9 @@ def fill_missing(gc_filled):
 
 def fill_missing_sub(gene):
 #   for gene in gc_pd.index:
-    gene_length = max([len(gc_pd[rec][gene]) for rec in gc_pd.columns if str(gc_pd[rec][gene])!='nan'])
+    gene_length = max([len(gc_pd_temp[rec][gene]) for rec in gc_pd_temp.columns if str(gc_pd_temp[rec][gene])!='nan'])
     is_na = "-"*gene_length
-    replace = [strain for strain in gc_pd.columns if str(gc_pd[strain][gene])=="nan"]
+    replace = [strain for strain in gc_pd_temp.columns if str(gc_pd_temp[strain][gene])=="nan"]
     
     for rec in replace:
         gc_filled[rec][gene] = is_na
@@ -54,11 +54,11 @@ def concatenate_ind(split):
         new_split[strain_column] = full_genome
     return new_split
 
-def concatenate_fasta_parallel(gc_filled):
-    strains = gc_filled.columns
-    split_strains = split_list(strains, 8)
-    pool = mp.Pool(process = 8)
-    results_concat = [pool.apply(concatenate_ind, args=split) for split in split_strains]
+#def concatenate_fasta_parallel(gc_filled):
+#    strains = gc_filled.columns
+#    split_strains = split_list(strains, 8)
+#    pool = mp.Pool(process = 8)
+#    results_concat = [pool.apply(concatenate_ind, args=split) for split in split_strains]
     
 def gene_positions(gc_filled):
     gene_coordinates = []
@@ -69,26 +69,16 @@ def gene_positions(gc_filled):
            gene_coordinates[rec] = [i, i+len(gc[strain][rec])]
     return temp_fasta, gene_coordinates   
     
-def create_fasta(gc):
-    gene_coordinates = []
-    temp_fasta = {strain:SeqRecord.SeqRecord(seq="", id = strain) for strain in gc.columns}
-    i=0
-    for rec in gc.index:
-       #gene_length = len(gc[STRAIN][rec])
-       for strain in gc.columns:
-           temp_fasta[strain].seq = Seq.Seq("".join([str(temp_fasta[strain].seq),gc[strain][rec]]))
-           #gene_coordinates[rec] = [i, i+len(gc[strain][rec])]
-    return temp_fasta
+
 #, gene_coordinates
         
-
-os.chdir("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/")
-gc_pd  = pickle.load(open("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/geneCluster.cpk", "rb")) 
-gc_filled = copy.deepcopy(gc_pd)
+temp_file = sys.argv[1]
+print(temp_file)
+os.chdir("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/temp_gc_pd")
+gc_pd_temp  = pickle.load(open(temp_file, "rb")) 
+gc_filled = copy.deepcopy(gc_pd_temp)
 fill_missing(gc_filled)
-gc_filled.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/geneCluster_filled1.cpk")
+gc_filled.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/temp_gc_pd/filled_"+temp_file.split("/")[-1])
 #gc_reordered = reorder(gc_filled)
 
-whole_fasta = create_fasta(gc_filled)
 
-SeqIO.write(list(whole_fasta.values()), "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/fake_gene_SNP2.fasta", "fasta")

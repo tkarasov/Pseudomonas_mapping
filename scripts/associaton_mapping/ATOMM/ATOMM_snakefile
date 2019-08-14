@@ -1,14 +1,35 @@
+code_direc=/ebio/abt6_projects8/Pseudomonas_mapping/code_Pseudomonas_mapping_git/scripts/associaton_mapping/ATOMM/
+panX_directory="/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524"
 
-rule convert_to_fasta:
+output_direc="/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files"
+
+
+
+#this first conversion step doesn't take much time or space so doesn't need to be done on the submit cluster
+
+rule convert_to_pd:
     input:
-        "/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/geneCluster"
+        $panx_directory/geneCluster
     output:
         "fake_gene_SNP.fasta"
         "snp_coordinates.txt"
     shell:
-        python prep_genotype.py {input}
+        python prep_genotype.py $panX_directory
 
-rule prep_plink_files:
+#Now we need to figure out how many chunks
+num_chunks=`ls $temp_direc | grep temp_pd | wc -l`
+
+#this next one takes a long time so must be done in parallel
+
+rule run_fill_fasta:
+    input:
+        $output_direc/temp_gc_pd
+    shell:
+        qsub -t 1-$num_chunks $code_direc/run_array_build_fasta.sh $output_direc/temp_gc_pd
+
+        #build_fasta.sh temp directory
+
+rule prep_vcf_files:
     input:
         "fake_gene_SNP.fasta"
     output:
@@ -16,20 +37,25 @@ rule prep_plink_files:
         "sizefile.txt"
         "freqfile.txt"
     shell:
-        python prep_for_gemma_atomm.py
+        python prep_for_gemma_atomm.py $output_direc
 
-rule build_kinship:
+rule build_kinship_gemma:
     input:
-        "fake_"
+
     output:
 
     shell:
-        /kinship_ATOMM.o -g genotypefile.txt -s sizefile.txt -k kinshipfile.txt -f freqfile.txt
+    gemma -g ../example/mouse_hs1940.geno.txt.gz -p ../example/mouse_hs1940.pheno.txt -gk -o mouse_hs1940 -debug
 
-rule run_gemma:
-    input:
-    output:
+rule run_gemma_univ_LMM:
     shell:
+    gemma -g ../example/mouse_hs1940.geno.txt.gz \
+    -p ../example/mouse_hs1940.pheno.txt -n 1 -a ../example/mouse_hs1940.anno.txt \
+    -k ./output/mouse_hs1940.cXX.txt -lmm -o mouse_hs1940_CD8_lmm \
+    -debug
+
+#/kinship_ATOMM.o -g genotypefile.txt -s sizefile.txt -k kinshipfile.txt -f freqfile.txt
+
 
 rule run_ATOMM:
     input:
