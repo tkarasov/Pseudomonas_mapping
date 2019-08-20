@@ -13,12 +13,35 @@ import pickle
 import pandas as pd
 sys.path.append('./')
 from treetime import *
+import pickle as cPickle
 #from treetime.treetime import treeanc as ta
 import treetime.treeanc as ta
 from treetime.gtr import GTR
 #from treetime import io
 from treetime import seq_utils
 from Bio import Phylo, AlignIO
+
+def load_sorted_clusters(path):  # Taken from Wei
+    '''
+    load gene clusters and sort 1st by abundance and then by clusterID
+    '''
+    geneClusterPath = '%s%s' % (path, 'protein_faa/diamond_matches/')
+    geneCluster_dt = load_pickle(geneClusterPath + 'allclusters_postprocessed.cpk')
+    from operator import itemgetter
+    # sort by decreasing abundance (-v[0], minus to achieve decreasing)
+    # followed by increasing strain count
+    gc_items = geneCluster_dt.items()
+
+    return sorted(geneCluster_dt.items(), key=lambda kv: (-itemgetter(0)(kv[1]), itemgetter(2)(kv[1])), reverse=False)
+    # return sorted(geneCluster_dt.iteritems(),
+    #            key=lambda (k,v): (-itemgetter(0)(v),itemgetter(2)(v)), reverse=False)
+
+
+def load_pickle(filename):
+    f = open(filename, "rb")
+    p = cPickle.load(f)
+    f.close()
+    return(p)
 
 
 def infer_gene_gain_loss(rates = [1.0, 1.0], path_to_pangenome_dir = '/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/'):
@@ -136,5 +159,27 @@ all_mutations = t.get_mutations(otu5_node) #596
 
 gains_otu5 = [mutation for mutation in all_mutations if mutation[0]=="0"] #586
 
-gains_other = [mutation for mutation in all_mutations if mutation[0]=="1"]
+gains_other = [mutation for mutation in all_mutations if mutation[0]=="1"] #10 genes?
+
+fna = "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/Ps_1524_all_fna.fna"
+
+sorted_genelist = load_sorted_clusters(path_to_pangenome_dir)
+
+record_dict = SeqIO.to_dict(SeqIO.parse(fna, "fasta")) #this takes a long time to load
+
+# Dictionary of gene name (e.g. "p24.G9|DPNPJAGB_03821") and it's putative annotation and associated contig
+gene_ids = load_pickle(path_to_pangenome_dir + "geneID_to_description.cpk")
+
+all_recs = []
+for rec in gains_otu5: 
+#[int(line.strip().split()[0]) for line in open(my_list).readlines()]:
+    # choose the most relevant genoem
+    GC = sorted_genelist[rec - 1][0]
+    keep = sorted_genelist[rec - 1][1][1][0]
+    look_up = gene_ids[keep]
+    sequence = record_dict[keep]
+    sequence.description = GC + ", " + str(rec) + ", " + look_up['annotation']
+    all_recs.append(sequence)
+
+SeqIO.write(all_recs, "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/otu5_significant_genes.fasta", "fasta")
 
