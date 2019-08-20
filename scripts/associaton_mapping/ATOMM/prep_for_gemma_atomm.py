@@ -46,7 +46,7 @@ def create_fasta(gc):
     return temp_fasta
 
 output_directory = sys.argv[1]#"/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/"
-os.chdir(output_directory + "/temp_gc_pd")
+os.chdir(output_directory + "/temp2_gc_pd")
 
 #must merge all filled pd data frames together
 filled_list = glob.glob("filled*")

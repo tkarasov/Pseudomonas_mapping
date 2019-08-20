@@ -107,6 +107,7 @@ gc_dict_args = [(fna, gc_dict) for fna in gene_list]
 results = [pool.apply(process_cluster, args=rec) for rec in gc_dict_args]
 
 i=0
+
 for line in results:
     i=i+1
     print(i)

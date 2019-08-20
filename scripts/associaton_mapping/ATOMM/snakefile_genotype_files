@@ -1,0 +1,45 @@
+configfile:
+    "config_genotype.json"
+
+#this snakefile is for taking the output from panX and generating vcfs and other files needed for mapping
+#this first conversion step doesn't take much time or space so doesn't need to be done on the submit cluster
+
+rule convert_to_pd:
+    input:
+        config['panX_directory']"/geneCluster"
+    output:
+        "fake_gene_SNP.fasta"
+        "snp_coordinates.txt"
+    shell:
+        "python prep_genotype.py {input}"
+
+#Now we need to figure out how many chunks
+
+num_chunks = os.system("ls " + config['output_direc']"/temp2_gc_pd" + "| grep temp_pd | wc -l")
+
+#this next one takes a long time so must be done in parallel
+
+rule run_fill_fasta:
+    input:
+        config['output_direc']"/temp2_gc_pd"
+    params:
+        num_chunks
+    shell:
+        "qsub -t 1-'{params.num_chunks}' run_array_build_fasta.sh {input}"
+
+rule prep_vcf_files:
+    input:
+        config['output_direc']
+    output:
+        "genotypefile.txt"
+    shell:
+        "qsub -hold_jid 'run_array' run_prep_for_gemma_atomm.sh {input}"
+
+rule build_kinship_gemma:
+    input:
+
+    output:
+
+    shell:
+    gemma -g ../example/mouse_hs1940.geno.txt.gz -p ../example/mouse_hs1940.pheno.txt -gk -o mouse_hs1940 -debug
+

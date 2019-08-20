@@ -26,7 +26,7 @@ def fill_missing(gc_filled):
     #gc_filled.loc[gene]
     i = 0
     for gene in gc_filled.index:
-        i = i+1
+        i = i+1a
         print(i)
         fill_missing_sub(gene)
         #print(gene)
@@ -74,11 +74,11 @@ def gene_positions(gc_filled):
         
 temp_file = sys.argv[1]
 print(temp_file)
-os.chdir("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/temp_gc_pd")
+os.chdir("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/temp2_gc_pd")
 gc_pd_temp  = pickle.load(open(temp_file, "rb")) 
 gc_filled = copy.deepcopy(gc_pd_temp)
 fill_missing(gc_filled)
-gc_filled.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/temp_gc_pd/filled_"+temp_file.split("/")[-1])
+gc_filled.to_pickle("/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/SNP_files/temp2_gc_pd/filled_"+temp_file.split("/")[-1])
 #gc_reordered = reorder(gc_filled)
 
 
