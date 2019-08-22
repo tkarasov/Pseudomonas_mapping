@@ -7,6 +7,7 @@ Created on Tue Aug 20 10:30:30 2019
 """
 import os,sys,copy;import numpy as np
 sys.path.append("/ebio/abt6_projects9/metagenomic_controlled/Programs/anaconda3/envs/mapping/lib/python3.7/site-packages/")
+from Bio import SeqIO
 from ete3 import Tree
 import glob
 import pickle
@@ -133,53 +134,67 @@ def pull_peg(value, genome, GC=True, gene_num=False):
         #if GC is true then must access GC file
     elif gene_num==True:
         #if peg then must 
+        
+def choose_pair(genome1, genome2):
+    focal_node = t.tree.common_ancestor(genome1, genome2)#"p4.C6", "p20.F8" used for otu5
+
+    all_mutations = t.get_mutations(focal_node) #596
+
+    gains_focal = [mutation for mutation in all_mutations if mutation[0]=="0"] #586
+
+    gains_other = [mutation for mutation in all_mutations if mutation[0]=="1"] #10 genes?
+
+    all_recs = []
+    for rec in gains_focal: 
+    # choose the most relevant genoem
+        GC = sorted_genelist[rec[1] - 1][0]
+        keep = [genome for genome in [sorted_genelist[rec[1] - 1][1][1]][0] if genome1 in genome]
+        if len(keep)==0:
+            keep = [sorted_genelist[rec[1] - 1][1][1]][0]
+        look_up = gene_ids[keep[0]]
+        sequence = record_dict[keep[0]]
+        sequence.description = GC + ", " + str(rec[1]) + ", " + look_up['annotation']
+        all_recs.append(sequence)
+    return all_recs
     
 panx_output = '/ebio/abt6_projects9/Pseudomonas_diversity/data/post_assembly_analysis/pan_genome/Ta1524/'# sys.argv[1] 
 
+my_genome = 'p25.C2'
+
 output_directory = '/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/presence_absence'#sys.argv[2] #
-
-
-os.chdir(output_directory)
-#import gene gain and losses from panX
-path_to_pangenome_dir=panx_output
-#t = path_to_pangenome_dir + '/vis/strain_tree.nwk'
-
-t = infer_gene_gain_loss(path_to_pangenome_dir, rates = [1.0, 1.0])
-calc_branch_length_in_tree(t, output_directory)#(path_to_pangenome_dir)
-num_events(t, output_directory)
-
-#get ancestor node 
-intree = path_to_pangenome_dir+"/vis/strain_tree.nwk"
-
-mytree = Tree(intree, format=1)
-
-otu5_node = t.tree.common_ancestor("p4.C6", "p20.F8")#("p20.G1", "p26.F9")
-
-all_mutations = t.get_mutations(otu5_node) #596
-
-gains_otu5 = [mutation for mutation in all_mutations if mutation[0]=="0"] #586
-
-gains_other = [mutation for mutation in all_mutations if mutation[0]=="1"] #10 genes?
 
 fna = "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/Ps_1524_all_fna.fna"
 
 sorted_genelist = load_sorted_clusters(path_to_pangenome_dir)
 
-record_dict = SeqIO.to_dict(SeqIO.parse(fna, "fasta")) #this takes a long time to load
+record_dict = SeqIO.to_dict(SeqIO.parse(fna, "fasta")) #this takes a long time to load. 'p11.A10|FKCDIBMD_00001'
 
 # Dictionary of gene name (e.g. "p24.G9|DPNPJAGB_03821") and it's putative annotation and associated contig
-gene_ids = load_pickle(path_to_pangenome_dir + "geneID_to_description.cpk")
+gene_ids = load_pickle(path_to_pangenome_dir + "geneID_to_description.cpk") #'p8.A9|IANDKOLE_03818'
 
-all_recs = []
-for rec in gains_otu5: 
-#[int(line.strip().split()[0]) for line in open(my_list).readlines()]:
-    # choose the most relevant genoem
-    GC = sorted_genelist[rec - 1][0]
-    keep = sorted_genelist[rec - 1][1][1][0]
-    look_up = gene_ids[keep]
-    sequence = record_dict[keep]
-    sequence.description = GC + ", " + str(rec) + ", " + look_up['annotation']
-    all_recs.append(sequence)
+intree = path_to_pangenome_dir+"/vis/strain_tree.nwk"
 
-SeqIO.write(all_recs, "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/otu5_significant_genes.fasta", "fasta")
+mytree = Tree(intree, format=1)
 
+
+###Now do stuff
+os.chdir(output_directory)
+
+#import gene gain and losses from panX
+path_to_pangenome_dir=panx_output
+#t = path_to_pangenome_dir + '/vis/strain_tree.nwk'
+
+t = infer_gene_gain_loss(rates = [1.0, 1.0], path_to_pangenome_dir=path_to_pangenome_dir)
+calc_branch_length_in_tree(t, output_directory)#(path_to_pangenome_dir)
+num_events(t, output_directory)
+
+#get ancestor node 
+
+otu5 = choose_pair("p25.C2", "p4.C6")
+SeqIO.write(otu5, "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/otu5_significant_genes.fasta", "fasta")
+
+p25_c2 = choose_pair("p25.C2", "p25.E4")
+SeqIO.write(otu5, "/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/p25_c2_clade_significant_genes.fasta", "fasta")
+
+#separating p25.c2 and the neighboring clade is p25.E4
+p25_c2_closest = choose_pair("p25.C2", "p25.E4")

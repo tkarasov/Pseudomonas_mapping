@@ -3,16 +3,17 @@ configfile:
 
 #this snakefile is for taking the output from panX and generating files that indicate which genes are associated with which nodes
 
-rule convert_to_pd:
+rule node_association:
     input:
-        config['panX_directory']"/geneCluster"
+        config['panX_directory']
     output:
         "fake_gene_SNP.fasta"
         "snp_coordinates.txt"
     shell:
-        "python prep_genotype.py {input}"
+        "python node_association {input}"
 
-#Now we need to figure out how many chunks
+
+#Now we need to figure out where these genes lie on the genome
 
 num_chunks = os.system("ls " + config['output_direc']"/temp2_gc_pd" + "| grep temp_pd | wc -l")
 
