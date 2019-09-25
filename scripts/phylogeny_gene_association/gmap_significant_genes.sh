@@ -2,7 +2,7 @@
 
 dir=/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/p25_c2_liftover/
 
-refgenome=/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/plate25.C2.pilon.contigs_renamed.fasta
+refgenome=/ebio/abt6_projects8/Pseudomonas_mapping/data/mapping/references_sequences/p25.C2.contigs.second_polished.pilon.fasta
 #p25.C2.contigs.second_polished.pilon.fasta
 gmap_build -D $dir/ -d p25_c2 $refgenome
 
@@ -18,3 +18,5 @@ samtools index otu5_significant_genes.bam
 
 gmap -D $dir -d p25_c2 -f samse -t 8 $avrE | samtools view -Shb| samtools sort -o p25_c2_avrE.bam
 samtools index p25_c2_avrE.bam
+
+#the next step is to
