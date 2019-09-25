@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Talia_Karasov" />
+
+
+<title>Infection_mapping</title>
+
+<script src="ind_mutant_infections_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="ind_mutant_infections_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="ind_mutant_infections_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="ind_mutant_infections_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="ind_mutant_infections_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="ind_mutant_infections_files/navigation-1.1/tabsets.js"></script>
+<link href="ind_mutant_infections_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="ind_mutant_infections_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Infection_mapping</h1>
+<h4 class="author">Talia_Karasov</h4>
+<h4 class="date">8/27/2019</h4>
+
+</div>
+
+
+<p>Read in map of who was where</p>
+<pre class="r"><code>fileUrl &lt;- (&quot;https://docs.google.com/spreadsheets/d/1ar1stJXBPljPWMtrY5QcABxTfU-0Wv7GUyQ6Y6AbXvI/edit#gid=0&quot;)
+
+fileCSV &lt;- read_sheet(ss = fileUrl)
+
+pos_genot_map=fileCSV[,c(&quot;position&quot;,&quot;Genotype&quot;)]</code></pre>
+<p>Read in data from green pixels and merge with pos map</p>
+<pre class="r"><code>green_pixels = read.table(&quot;~/work_main/abt6_projects8/Pseudomonas_mapping/data/infection_experiments/august_2019/process_pixels_all.csv&quot;, sep=&quot;\t&quot;, header=T)
+
+green_pixels = merge(pos_genot_map, green_pixels, by.x = &quot;position&quot;, by.y = &quot;position&quot;)
+
+green_pixels = subset(green_pixels, Genotype!=&quot;NA&quot;)
+
+greenp_ww = green_pixels[green_pixels$Plate %in% c(&quot;plate1_1_uncover_23082019&quot;, &quot;plate1_2_uncover_2382019&quot;),]
+
+greenp_mutant = green_pixels[green_pixels$Plate %in% c(&quot;plate2_1_uncover_2382019&quot;, &quot;plate3_2_uncover_2382019&quot;),]</code></pre>
+<p>Now plot the green pixels</p>
+<pre class="r"><code>greenp_mutant$Genotype = as.factor(greenp_mutant$Genotype)
+
+greenp_mutant$Genotype = factor(greenp_mutant$Genotype, levels = c(&quot;C&quot;, &quot;DC3000&quot;, &quot;WT&quot;, &quot;AVRE&quot;, &quot;HRC&quot;))
+
+the_means = greenp_mutant %&gt;% group_by(Genotype) %&gt;% dplyr::summarise(mean = mean(Green_pixels, na.rm=T), se = sd(Green_pixels, na.rm=T) / length(Green_pixels)) 
+
+base = ggplot(data = the_means, aes(x=Genotype, y=mean, colour=Genotype))
+
+p2 = base + geom_errorbar(aes(ymin=mean, ymax=mean), width=.5) +
+ theme_light() + 
+  geom_jitter(data = greenp_mutant, aes(x=Genotype, y=Green_pixels), width=0.1, alpha=0.5) + 
+  ylab(&quot;Green Pixel Number&quot;) +
+  scale_color_manual(values = mycolors) 
+
+p2</code></pre>
+<p><img src="ind_mutant_infections_files/figure-html/unnamed-chunk-3-1.png" /><!-- --></p>
+<p>Let’s do a comparison between the avrE and hrc with WT</p>
+<pre class="r"><code>greenp_mutant_WT = subset(greenp_mutant, Genotype==&quot;WT&quot;)
+greenp_mutant_AVRE = subset(greenp_mutant, Genotype==&quot;AVRE&quot;)
+greenp_mutant_hrc = subset(greenp_mutant, Genotype==&quot;HRC&quot;)
+
+wilcox.test(greenp_mutant_WT$Green_pixels, greenp_mutant_hrc$Green_pixels)</code></pre>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  greenp_mutant_WT$Green_pixels and greenp_mutant_hrc$Green_pixels
+## W = 19, p-value = 0.2037
+## alternative hypothesis: true location shift is not equal to 0</code></pre>
+<pre class="r"><code>wilcox.test(greenp_mutant_WT$Green_pixels, greenp_mutant_AVRE$Green_pixels)</code></pre>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  greenp_mutant_WT$Green_pixels and greenp_mutant_AVRE$Green_pixels
+## W = 19, p-value = 0.3235
+## alternative hypothesis: true location shift is not equal to 0</code></pre>
+<p>Now let’s look at colonies from 8.26.2019</p>
+<pre class="r"><code>cfu = fileCSV[,c(&quot;Genotype&quot;, &quot;Base_calc&quot;, &quot;dil1_calc&quot;, &quot;dil2_calc&quot;, &quot;dil3_calc&quot;, &quot;dil4_calc&quot;)]
+
+real_cfu = cfu %&gt;% rowwise() %&gt;% dplyr::summarise(max = max(Base_calc, dil1_calc, dil2_calc, dil3_calc, dil4_calc, na.rm = TRUE))
+
+cfu$cfu_calc = real_cfu$max
+
+cfu$Genotype = factor(cfu$Genotype, levels = c(&quot;C&quot;, &quot;DC3000&quot;, &quot;WT&quot;, &quot;AVRE&quot;, &quot;HRC&quot;, &quot;P5&quot;, &quot;P13&quot;, &quot;P22&quot;))
+
+cfu = subset(cfu, Genotype!=&quot;NA&quot;)
+
+cfu_means = cfu %&gt;% group_by(Genotype) %&gt;% dplyr::summarise(mean = mean(cfu_calc, na.rm=T), se = sd(cfu_calc, na.rm=T) / length(cfu_calc))
+
+cfu_alone = ggplot(data = cfu_means, aes(x=Genotype, y=log10(mean))) +
+  geom_errorbar(aes(ymin=log10(mean), ymax=log10(mean), width=.5)) +
+ theme_light() + 
+  geom_jitter(data = cfu, aes(x=Genotype, y=log10(cfu_calc+1)), width=0.1, alpha=0.5) + 
+  scale_color_manual(values = mycolors) 
+
+cfu_alone</code></pre>
+<p><img src="ind_mutant_infections_files/figure-html/unnamed-chunk-5-1.png" /><!-- --></p>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
