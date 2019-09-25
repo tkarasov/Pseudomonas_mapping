@@ -48,9 +48,6 @@ pa_full = read.FASTA(paste(path, "/abt6_projects8/Pseudomonas_mapping/code_Pseud
 
 pa_convert = DNAbin2genind(pa_full)@tab
 
-subset_pa = pa_convert[rownames(pa_convert) %in% names(phen),]
-
-
 ```
 
 
@@ -58,6 +55,7 @@ subset_pa = pa_convert[rownames(pa_convert) %in% names(phen),]
 Run treeWAS on P/A matrix
 ```{r, echo = TRUE}
 out.pa <- treeWAS(snps = subset_pa, phen = phen, tree = tree, seed = 1, p.value.correct = "FDR", p.value = 0.01)
+
 ```
 
 Now pull the "test-specified" significant associations, and find associated genes
@@ -70,7 +68,7 @@ sig = unique(gsub(".c","", sig))
 
 FDR = 0.05
 ```{r, echo = TRUE}
-out.pa.df$gene = c(1:dim(out.pa.df[1]))
+out.pa$gene = c(1:dim(out.pa.[1]))
 
 p1 = qplot(x = c(1:length(out.pa$subsequent$p.vals)), y = -log10(out.pa$subsequent$p.vals)) + theme_bw() + xlab("Gene Order") + ylab("-log10(p-value)")
             
