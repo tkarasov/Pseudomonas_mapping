@@ -1,3 +1,4 @@
+#edited now for
 cd /ebio/abt6_projects8/Pseudomonas_mapping/poo
 for sample in `ls /ebio/abt6_projects8/Pseudomonas_mapping/mneumann_tnseq/TnSeq_Oct19/ | grep bam`;
 do
