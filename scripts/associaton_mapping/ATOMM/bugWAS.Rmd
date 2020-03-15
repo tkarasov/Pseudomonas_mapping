@@ -1,9 +1,0 @@
-
-#bugWas manual: https://github.com/sgearle/bugwas/blob/master/manual/bugwas.pdf
-
-# Run Gemma
-```{r}
-lin_loc(gen = "genotype_file", pheno = "phenotype_file", phylo = "phylo.nwk", prefix = "lin_loc", gem.path = "gemma_path")
-
-data <- lin_loc(gen = gen, pheno = pheno, phylo = phylo, prefix = prefix, gem.path = gem.path)
-```
