@@ -14,23 +14,40 @@
 #
 ## $ -V
 
+# read1=$read1
+# read2=$read2
+# plate=$plate
+# pos=$pos
+# path=$path
+
+# cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping
+# mkdir tmp
+# #ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references/GCF_900184295.1_Chr_1_genomic.fna tmp/
+# ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references/JRXH01.fasta tmp
+# bowtie2-build tmp/JRXH01.fasta tmp/reference
+# mkdir tmp/alignments
+# bowtie2 \
+#  -x tmp/reference \
+#  -1 $path/$read1 \
+#  -2 $path/$read2 \
+#   > tmp/alignments/$plate.$pos.sam
+
+#   samtools view -Sb tmp/alignments/$plate.$pos.sam | samtools sort - > tmp/alignments/$plate.$pos.bam
+#   samtools index tmp/alignments/$plate.$pos.bam   # creates f1_B.sorted.bam.bai
+
+
 read1=$read1
 read2=$read2
 plate=$plate
 pos=$pos
 path=$path
 
-cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping
-mkdir tmp
-#ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references/GCF_900184295.1_Chr_1_genomic.fna tmp/
-ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references/JRXH01.fasta tmp
-bowtie2-build tmp/JRXH01.fasta tmp/reference
-mkdir tmp/alignments
-bowtie2 \
- -x tmp/reference \
- -1 $path/$read1 \
- -2 $path/$read2 \
-  > tmp/alignments/$plate.$pos.sam
 
-  samtools view -Sb tmp/alignments/$plate.$pos.sam | samtools sort - > tmp/alignments/$plate.$pos.bam
-  samtools index tmp/alignments/$plate.$pos.bam   # creates f1_B.sorted.bam.bai
+cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping
+
+bwa mem tmp/sequences.fa.gz \
+ $path/$read1 \
+ $path/$read2 > tmp/alignments/$plate.$pos.sam
+
+samtools view -Sb tmp/alignments/$plate.$pos.sam | samtools sort - > tmp/alignments/$plate.$pos.bam
+samtools index tmp/alignments/$plate.$pos.bam   # creates f1_B.sorted.bam.bai

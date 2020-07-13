@@ -1,0 +1,20 @@
+-- Plate analysis --
+
+1. Copy the contents of this folder to your experimental directory.
+2. Check the run.bash script and adjust IMAGE_DIR and images wildcard if
+   needed
+
+3. Prepare your mask:
+   Needs to be an indexed 8bit (256 color) png file, with transparent
+   background.
+   Individual positions are differenciated by subsequent colors. GIMP can be
+   used to create the mask.
+   Start with one color, e.g. number 50. This will correspond to pot 0. Use
+   'Fill with foreground color' to fill a selected region with this color.
+   Next pot must have the color number 51, and so on.
+   Repeat this process until all pots are marked.
+4. run run.bash
+
+Questions/feedback: ilja.bezrukov@tuebingen.mpg.de
+Version: 20190725_aduque
+

@@ -6,14 +6,26 @@
 #!/bin/bash
 #$ -N run_mapping
 #
-#
+# This one was written for mapping to a difference viridiflava genome
+
+
+########################################
+# Index reference sequence
+########################################
+conda activate mapping
+cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping/
+mkdir tmp
+#ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references/GCF_900184295.1_Chr_1_genomic.fna tmp/
+ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/data/Pseudomonas_viridiflava_p25_c2/sequences.fa.gz tmp
+#bowtie2-build tmp/p25.C2.contigs.second_polished.pilon.fasta tmp/reference
+bwa index tmp/sequences.fa.gz
+mkdir tmp/alignments
 
 
 cd /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff
 #   
 ########################################
-# Map list of Pseudomonas to strain CFBP 1590 
-# https://www.ncbi.nlm.nih.gov/genome/?term=viridiflava+uasws0038
+# Map list of Pseudomonas to p25.c2
 ########################################
 
 #strain list of OTU5 to which we should map (taken from recombination analyses in previous study)
@@ -74,33 +86,63 @@ if [[ " ${WORD_LIST4[@]} " =~ " ${plate} " ]]
 fi
 done
 
+########################################
+# We need one outgroup genome for pop-gen statistics. We are going to use B728a.
+########################################
+cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references
+wget http://ftp.sra.ebi.ac.uk/vol1/run/ERR005/ERR005143/ID49_020708_20H04AAXX_R1.s_7_sequence.fastq 
+read1=/ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/references/ID49_020708_20H04AAXX_R1.s_7_sequence.fastq
 
+cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping
+bwa mem tmp/sequences.fa.gz \
+	$read1 \
+ 	 > tmp/alignments/B728a.sam
 
+samtools view -Sb tmp/alignments/B728a.sam | samtools sort - > tmp/alignments/B728a.bam
+samtools index tmp/alignments/B728a.bam
 
 ########################################
 # Pause this next step until previous is done.
 # Now build vcf: https://wurmlab.github.io/genomicscourse/2016-SIB/practicals/population_genetics/map_call,
 ########################################
+qsub /ebio/abt6_projects8/Pseudomonas_mapping/code_Pseudomonas_mapping_git/scripts/snp_eff/run_bcf_tools.sh
 
+#bcftools view -g ^miss
+########################################
+# Check the validity of my edited vcf
+# https://help.galaxyproject.org/t/snpeff-annotation-transcript-information-discordant-to-the-information-available-on-the-ensemble-website/2670/2
+########################################
+ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/SnpSift.jar
+ln -rs /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/snpEff.jar
+#get chromsome names from database
+java -Xmx4G -jar snpEff.jar chromosome-inf Pseudomonas_viridiflava_gca_001305955
 
-ln -rs tmp/JRXH01.fasta tmp/reference.fa
-samtools faidx tmp/reference.fa
+java -Xmx4G -jar SnpSift.jar vcfCheck tmp/variants/filtered_calls_renamed.vcf
 
-# Run samtools mpileup
-mkdir tmp/variants
-samtools mpileup -uf tmp/reference.fa /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping/tmp/alignments/*.bam > tmp/variants/raw_calls.bcf
-
-# Run bcftools call
-bcftools call --ploidy 1 -v -m tmp/variants/raw_calls.bcf > tmp/variants/calls.vcf
-
-bcftools filter --exclude 'QUAL < 30' tmp/variants/calls.vcf | \
-bcftools view -g ^miss > tmp/variants/filtered_calls.vcf
-
-
+########################################
+# Download genome of interest
+########################################
+java -Xmx4G -jar snpEff.jar  download 
+java -Xmx4G -jar /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/snpEff.jar dump Pseudomonas_viridiflava_p25_c2
 
 ########################################
 # Now run SNPeff
 ########################################
-java -Xmx4G /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff.jar  -c /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff.cofig -v Pseudomonas_viridiflava_gca_001305955  tmp/variants/filtered_calls.vcf
+#to check the integrity of the vcf:
+java -jar /ebio/abt6_projects8/Pseudomonas_mapping/Programs/jvarkit/dist/vcf2table.jar filtered_calls.vcf
 
+cd /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping/tmp/variants
+java -jar /ebio/abt6_projects8/Pseudomonas_mapping/Programs/jvarkit/dist/vcf2table.jar my90_p25_c2.vcf
+
+
+java -Xmx4G -jar /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/snpEff.jar  \
+-c /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/snpEff_p25_c2.config \
+-v Pseudomonas_viridiflava_p25_c2 /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping/tmp/variants/filtered_calls2.vcf > \
+ my90_B728a_p25_c2.vcf
+
+
+java -Xmx4G -jar /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/snpEff.jar  \
+-c /ebio/abt6_projects8/Pseudomonas_mapping/Programs/snpEff_latest_core/snpEff/snpEff_p25_c2.config \
+-v Pseudomonas_viridiflava_p25_c2 /ebio/abt6_projects8/Pseudomonas_mapping/data/SNP_eff/read_mapping/tmp/variants/filtered_calls_no_B728.vcf > \
+ my90_p25_c2.vcf
 
