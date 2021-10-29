@@ -14,9 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(reshape2)
 library('dplyr')
 library('treeWAS')
-library(ape)
+library("ape")
 library("ggplot2")
 library("phangorn")
+library("cowplot"")
 ```
 
 \
@@ -57,7 +58,7 @@ subset_pa = pa_convert[rownames(pa_convert) %in% names(phen),]
 \ 
 Run treeWAS on P/A matrix
 ```{r, echo = TRUE}
-out.pa <- treeWAS(snps = subset_pa, phen = phen, tree = tree, seed = 1, p.value.correct = "FDR", p.value = 0.01)
+out.pa.df <- treeWAS(snps = subset_pa, phen = phen, tree = tree, seed = 1, p.value.correct = "FDR", p.value = 0.01)
 ```
 
 Now pull the "test-specified" significant associations, and find associated genes
@@ -72,7 +73,7 @@ FDR = 0.05
 ```{r, echo = TRUE}
 out.pa.df$gene = c(1:dim(out.pa.df[1]))
 
-p1 = qplot(x = c(1:length(out.pa$subsequent$p.vals)), y = -log10(out.pa$subsequent$p.vals)) + theme_bw() + xlab("Gene Order") + ylab("-log10(p-value)")
+p1 = qplot(x = c(1:length(out.pa.df$subsequent$p.vals)), y = -log10(out.pa$subsequent$p.vals)) + theme_bw() + xlab("Gene Order") + ylab("-log10(p-value)")
             
 p2 = qplot(x = c(1:length(out.pa$simultaneous$p.vals)), y = -log10(out.pa$simultaneous$p.vals)) + theme_bw() + xlab("Gene Order") + ylab("-log10(p-value)")
 
