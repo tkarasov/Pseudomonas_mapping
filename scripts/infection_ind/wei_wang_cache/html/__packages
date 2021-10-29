@@ -1,0 +1,11 @@
+base
+reshape2
+dplyr
+ggplot2
+bitops
+RCurl
+googlesheets4
+googledrive
+lattice
+plyr
+Rmisc
